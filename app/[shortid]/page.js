@@ -5,21 +5,36 @@ import { Url } from '@/lib/models/Url';
 import { ensureHttpScheme } from '@/lib/utils';
 
 async function getUrl(shortid) {
-  await connectDB();
-  const urlEntry = await Url.findOne({ shortid });
-  return urlEntry;
+  try {
+    await connectDB();
+    const urlEntry = await Url.findOne({ shortid });
+    console.log(`Looking for shortid: "${shortid}"`, urlEntry ? 'Found' : 'Not found');
+    return urlEntry;
+  } catch (error) {
+    console.error('Error fetching URL:', error);
+    return null;
+  }
 }
 
 export default async function RedirectPage({ params }) {
-  const { shortid } = params;
+  const { shortid } = await params;
+  
+  console.log('Redirect page accessed with shortid:', shortid);
   
   try {
     const urlEntry = await getUrl(shortid);
     
     if (urlEntry) {
+      // Redirect will throw NEXT_REDIRECT - this is normal Next.js behavior
       redirect(ensureHttpScheme(urlEntry.originalUrl));
     }
+    
+    console.log('URL entry not found in database');
   } catch (error) {
+    // Ignore NEXT_REDIRECT errors (expected behavior)
+    if (error.message === 'NEXT_REDIRECT') {
+      throw error;
+    }
     console.error('Error redirecting:', error);
   }
 
