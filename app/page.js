@@ -12,17 +12,15 @@ export default function Home() {
   const [copied, setCopied] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
   const fetchAllUrls = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/url/allURLs`);
+      const res = await fetch('/api/url/allURLs');
       const data = await res.json();
       setAllUrls(data.urls || []);
     } catch (err) {
       console.error('Failed to fetch URLs:', err);
     }
-  }, [API_BASE]);
+  }, []);
 
   useEffect(() => {
     fetchAllUrls();
@@ -41,7 +39,7 @@ export default function Home() {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/api/url/shorten`, {
+      const res = await fetch('/api/url/shorten', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -162,7 +160,7 @@ export default function Home() {
                     </label>
                     <div className="flex items-center flex-1 border border-slate-700 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 bg-slate-800">
                       <span className="px-3 py-2 bg-slate-900 text-slate-500 text-sm border-r border-slate-700">
-                        {API_BASE}/
+                        {typeof window !== 'undefined' ? window.location.origin : 'localhost:3000'}/
                       </span>
                       <input
                         type="text"
@@ -293,7 +291,7 @@ export default function Home() {
                         <div className="flex items-center gap-2">
                           <code className="text-sm font-semibold text-blue-400">/{url.shortid}</code>
                           <button
-                            onClick={() => copyToClipboard(`${API_BASE}/${url.shortid}`)}
+                            onClick={() => copyToClipboard(`${window.location.origin}/${url.shortid}`)}
                             className="p-1 hover:bg-slate-700 rounded transition"
                             title="Copy link"
                           >
@@ -322,7 +320,7 @@ export default function Home() {
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end gap-2">
                           <a
-                            href={`${API_BASE}/${url.shortid}`}
+                            href={`/${url.shortid}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-2 text-slate-400 hover:bg-slate-800 rounded-lg transition"
